@@ -179,6 +179,46 @@ app.patch("/events/:id", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /events/{id}:
+ *   delete:
+ *     summary: Delete an event
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the event to delete
+ *     responses:
+ *       200:
+ *         description: Event deleted successfully
+ *       404:
+ *         description: Event not found
+ *       500:
+ *         description: Failed to delete event
+ */
+app.delete("/events/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedEvent = await prisma.events.delete({
+      where: { id: parseInt(id) },
+    });
+
+    res.json({ message: "Event deleted successfully", deletedEvent });
+  } catch (error) {
+    console.error(error);      
+    if (error.code === "P2025") {
+      res.status(404).json({ error: "Event not found" });
+    } else {
+      res.status(500).json({ error: "Failed to delete event" });
+    }
+  }
+});
+
+
 app.listen(7000, () =>
   console.log("🚀 Server running at http://localhost:7000")
 );
